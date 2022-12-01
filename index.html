@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CONNECTION TO METAMASK</title>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"
+    ></script>
+    <style>
+      body {
+        background-color: palevioletred;
+        font-size: 33px;
+        text-align: center;
+      }
+      button {
+        background-color: aquamarine;
+        font-size: 33px;
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      }
+      button:hover {
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <button onclick="connectMetamask()">CONNECT TO METAMASK</button> <br />
+    <p id="accountArea"></p>
+    <button onclick="connectContract()">CONNECT TO CONTRACT</button> <br />
+    <p id="contractArea"></p>
+    <button onclick="readContract()">GET DATA FROM CONTRACT</button> <br />
+    <p id="dataArea"></p>
+    <button onclick="mintToken()">MINT TOKEN</button> <br />
+    <p id="mintRes"></p>
+    <button onclick="transferToken()">TRANSFER TOKEN</button> <br />
+    <p id="transferRes"></p>
+    <button onclick="getBalance()">GET TOKEN BALANCE</button> <br />
+    <p id="getBalance"></p>
+    <script>
+      //1- connect metamask
+      let account;
+      const connectMetamask = async () => {
+        if (window.ethereum !== "undefined") {
+          const accounts = await ethereum.request({
+            method: "eth_requestAccounts",
+          });
+          account = accounts[0];
+          document.getElementById("accountArea").innerHTML = account;
+        }
+      };
+
+      //2- connect to smart contract
+      const connectContract = async () => {
+        const abi = JSON.parse(
+          '[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mintToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}]'
+        );
+        const Address = "0x0CFFa3977d382d9CC70C24D16f4D0695159A85c6";
+        window.web3 = await new Web3(window.ethereum);
+        window.contract = await new window.web3.eth.Contract(abi, Address);
+        console.log(window.contract);
+        document.getElementById("contractArea").innerHTML =
+          "connected to smart contract";
+      };
+
+      //3-read data from smart contract
+      const readContract = async () => {
+        const data = await window.contract.methods.totalSupply().call();
+        document.getElementById("dataArea").innerHTML = data;
+      };
+      const mintToken = async () => {
+        const data = await window.contract.methods.mintToken(500000).send({
+          from: account,
+        });
+        console.log(data);
+        document.getElementById("mintRes").innerHTML = data;
+      };
+      const transferToken = async () => {
+        const data = await window.contract.methods
+          .transfer("0xf95273d5a253E017C126Fc3239D16E16fEc15B37", 10 * 10 ** 18)
+          .send({
+            from: account,
+          });
+        console.log(data);
+        document.getElementById("transferRes").innerHTML = data;
+      };
+      const getBalance = async () => {
+        const data = await window.contract.methods.balanceOf(account).call();
+        console.log(data);
+        document.getElementById("getBalance").innerHTML = data;
+      };
+    </script>
+  </body>
+</html>
